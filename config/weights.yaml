@@ -1,0 +1,52 @@
+# SAT-SA Detector Weights Configuration
+# Version-controlled. Edit weights here; do NOT hardcode in engine modules.
+#
+# R = min(100, sum(w_i * F_i))
+# where F_i is a graded value in [0, 1]:
+#   - For p-value tests:  F_i = 1 - p_value
+#   - For score-based:   F_i = normalized effect size (see each detector's docstring)
+#   - If binary_flag_mode = true: F_i ∈ {0, 1} (for legal-tier defensibility)
+
+version: "1.0.0"
+binary_flag_mode: false    # Set true to use binary flags instead of graded scores
+
+weights:
+  G2_severity_laundering: 35     # Highest — direct evidence of metric gaming
+  G1_velocity_distortion: 25     # Rubber-stamping; high confidence test
+  G3_temporal_clustering: 15     # Shift-end gaming
+  G4_template_collapse:   10     # Copy-paste notes
+  G5_workload_inconsistency: 10  # Impossible workload claims
+  G6_silent_loop:         10     # Recurring fast-closed alerts
+  L1_sla_violation:       10     # Informational; overt SLA breach
+  L1_negative_space:      10     # Monitoring blind spot
+
+# MinHash / LSH parameters (G4)
+minhash:
+  num_permutations: 128
+  bands: 16          # 16 bands × 8 rows → Jaccard threshold ≈ 0.71
+  rows_per_band: 8
+  ngram_size: 3      # Character trigrams
+  jaccard_threshold: 0.71
+
+# Bowker Monte Carlo parameters (G2 fallback for small expected cell counts < 5)
+bowker:
+  permutation_n: 9999
+  seed: 42
+  small_cell_threshold: 5    # Expected count below which permutation test is used
+
+# Temporal entropy parameters (G3)
+temporal:
+  bin_minutes: 15            # Temporal bin width for shift-end gaming detection
+  low_entropy_threshold: 0.4 # H/log2(n) below this flags shift-end gaming
+
+# Negative space cohort parameters (L1)
+cohort:
+  min_cohort_size: 5         # Below this, emit LOW_COHORT_CONFIDENCE
+  negative_space_percentile: 5   # Flag entities below p5 of cohort volume
+  lookback_days: 90
+
+# Silent loop parameters (G6)
+silent_loop:
+  fast_close_minutes: 30     # Closure within this window = "fast close"
+  recurrence_threshold: 3    # Occurrences on same asset within window to flag
+  lookback_days: 30

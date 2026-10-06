@@ -1,0 +1,62 @@
+# SAT-SA Threshold Configuration
+# Version-controlled. Two tiers: internal (adaptive) and legal (fixed).
+#
+# IMPORTANT: Legal thresholds are fixed and documented for defensibility on appeal.
+# Internal thresholds may be randomized/calibrated against uncontaminated baselines.
+
+version: "1.0.0"
+
+# ── SLA Limits (Layer 1) ─────────────────────────────────────────────────────
+sla_limits:
+  # Maximum allowed time from alert creation to first acknowledgement (minutes)
+  ack_limits_minutes:
+    P1: 15
+    P2: 60
+    P3: 240
+    P4: 1440
+    P5: 4320
+  # Required escalation steps per severity (all must be performed before closure)
+  required_escalation_steps:
+    P1: ["triage", "escalate_to_l2", "notify_management"]
+    P2: ["triage", "escalate_to_l2"]
+    P3: ["triage"]
+    P4: []
+    P5: []
+
+# ── Internal Triage Thresholds ───────────────────────────────────────────────
+# Anchored to uncontaminated baselines via PELT changepoint detection.
+# These are defaults; the engine recomputes them from historical data when available.
+internal:
+  G1_dip_p_value: 0.05          # Flag if dip test p < threshold
+  G2_bowker_p_value: 0.05       # Flag if Bowker p < threshold
+  G3_entropy_ratio: 0.4         # Flag if H/log2(n) < threshold
+  G4_jaccard_cluster_pct: 0.20  # Flag if >20% of notes in entity have Jaccard > 0.71
+  G5_capacity_ratio: 1.0        # Flag if active_minutes / shift_minutes > 1.0
+  G6_recurrence_count: 3        # Flag if same asset fast-closed >= N times in window
+  L1_sla_violation_count: 1     # Flag on any SLA violation (informational)
+  L1_negative_space_pct5: true  # Flag if below p5 of matched cohort
+
+# ── Legal / Compliance Thresholds ────────────────────────────────────────────
+# FIXED. Disclosed in formal findings. Published null-corpus FPR per test family.
+# DO NOT CHANGE without a documented versioned amendment.
+legal:
+  G1_dip_p_value: 0.01
+  G2_bowker_p_value: 0.01
+  G3_entropy_ratio: 0.25
+  G4_jaccard_cluster_pct: 0.30
+  G5_capacity_ratio: 1.5        # >150% capacity = legal finding threshold
+  G6_recurrence_count: 5
+  # Published false-positive rates (from null corpus; see docs/validation/)
+  fpr_published:
+    G1: 0.05   # Updated after null-corpus run
+    G2: 0.05
+    G3: 0.05
+    G4: 0.05
+    G5: 0.01
+    G6: 0.05
+
+# ── CERT-In Compliance Windows ───────────────────────────────────────────────
+# Tracked SEPARATELY from SOC performance metrics (per design requirement).
+cert_in:
+  initial_report_hours: 6       # CERT-In mandatory 6-hour incident report
+  log_retention_days: 180       # 180-day log retention requirement

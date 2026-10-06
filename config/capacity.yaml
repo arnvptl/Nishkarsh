@@ -1,0 +1,26 @@
+# SAT-SA Analyst Capacity Configuration
+# Version-controlled. All time values in minutes.
+#
+# Default shift = 480 minutes (8 hours) NET OF BREAKS.
+# Configurable per shift_id using the overrides section.
+# G5 (Workload Inconsistency) reads from this file.
+
+version: "1.0.0"
+
+defaults:
+  shift_duration_minutes: 480     # Net of breaks (8-hour shift minus break time)
+  break_minutes: 60               # Standard break time (already deducted from above)
+  gross_shift_minutes: 540        # Gross shift duration before breaks
+
+# Per-shift overrides (optional). Shift IDs matching these patterns use override values.
+# Uses exact string match on shift_id field.
+# Example:
+#   NIGHT_SHIFT:
+#     shift_duration_minutes: 420   # 7-hour net (night shift with longer breaks)
+shift_overrides: {}
+
+# Hard limits for G5 detector
+limits:
+  max_ratio_for_legal_finding: 1.5   # >150% of net shift = legal threshold
+  max_ratio_for_internal_flag: 1.0   # >100% of net shift = internal triage flag
+  min_tasks_to_evaluate: 3           # Don't flag if analyst had fewer than N tasks
