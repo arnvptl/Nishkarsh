@@ -101,12 +101,12 @@ SATSA_DB_PATH="data/satsa.db" uvicorn api.main:app --host 127.0.0.1 --port 8000
 Open **http://127.0.0.1:8000** in your web browser to view the Dashboard!
 
 ### Option B: Using the CLI
-For production use where data is provided externally, use the `satsa` CLI:
+For production use where data is provided externally, use the python module directly:
 ```bash
-satsa ingest --data-dir data/ --db data/satsa.db    # Ingest + validate
-satsa run --db data/satsa.db --cycle DEMO           # Run all detectors
-satsa verify --db data/satsa.db                     # Verify the Audit Chain
-satsa serve --db data/satsa.db --port 8000          # Start the Dashboard
+python -m engine.cli ingest --data-dir data/ --db data/satsa.db    # Ingest + validate
+python -m engine.cli run --db data/satsa.db --cycle DEMO           # Run all detectors
+python -m engine.cli verify-audit --db data/satsa.db               # Verify the Audit Chain
+python -m engine.cli serve --db data/satsa.db --port 8000          # Start the Dashboard
 ```
 
 ---
